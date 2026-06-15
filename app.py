@@ -3,9 +3,8 @@ import re
 
 app = Flask(__name__)
 
-# Your store data - Lakheri Lac BANGLES
 STORE_INFO = {
-    "name": "Lakheri Lac BANGLES",
+    "name": "Lakheri Lac Jewellery",
     "products_en": [
         {"id": 1, "name": "Lac Bangles Set", "price": 499, "desc": "Handcrafted Rajasthani lac bangles - Set of 6"},
         {"id": 2, "name": "Lac Jhumka Earrings", "price": 349, "desc": "Traditional lac work jhumkas with beads"},
@@ -20,63 +19,28 @@ STORE_INFO = {
         {"id": 4, "name": "लाख अंगूठी", "price": 199, "desc": "शीशे के काम वाली एडजस्टेबल लाख अंगूठी"},
         {"id": 5, "name": "ब्राइडल लाख चूड़ा", "price": 1299, "desc": "पूरा सेट पारंपरिक ब्राइडल चूड़ा"}
     ],
-    "shipping_en": "Free shipping across India on orders above ₹999. Standard delivery: 5-7 days, ₹80",
-    "shipping_hi": "₹999 से ऊपर के ऑर्डर पर पूरे भारत में मुफ्त शिपिंग। स्टैंडर्ड डिलीवरी: 5-7 दिन, ₹80",
-    "returns_en": "7-day return policy. WhatsApp us at +91-XXXXXXXXXX for returns",
-    "returns_hi": "7 दिन की रिटर्न पॉलिसी। रिटर्न के लिए +91-XXXXXXXXXX पर WhatsApp करें",
-    "hours_en": "Mon-Sat 10am-7pm IST. Sunday closed",
-    "hours_hi": "सोम-शनि सुबह 10 से शाम 7 बजे IST। रविवार बंद"
+    "shipping_en": "Free shipping across India on orders above ₹999. Standard: 5-7 days, ₹80",
+    "shipping_hi": "₹999 से ऊपर के ऑर्डर पर पूरे भारत में मुफ्त शिपिंग। स्टैंडर्ड: 5-7 दिन, ₹80",
+    "returns_en": "7-day return policy. WhatsApp: +91-YOUR_NUMBER",
+    "returns_hi": "7 दिन की रिटर्न पॉलिसी। WhatsApp: +91-YOUR_NUMBER"
 }
 
 def detect_hindi(text):
-    # If message has Devanagari characters, treat as Hindi
     return bool(re.search(r'[\u0900-\u097F]', text))
 
 def get_bot_response(user_msg):
     is_hindi = detect_hindi(user_msg)
     user_msg = user_msg.lower()
-
-    # Greetings
-    if any(word in user_msg for word in ["hello", "hi", "hey", "namaste", "नमस्ते", "हेलो", "ram ram", "राम राम"]):
-        if is_hindi:
-            return f"नमस्ते! {STORE_INFO['name']} में आपका स्वागत है 👋 हस्तनिर्मित लाख ज्वेलरी के लिए मैं आपकी कैसे मदद कर सकती हूँ?"
-        else:
-            return f"Namaste! Welcome to {STORE_INFO['name']} 👋 How can I help you with handcrafted lac jewellery today?"
-
-    # Products
-    elif any(word in user_msg for word in ["product", "jewellery", "jewelry", "buy", "order", "price", "प्रोडक्ट", "गहने", "खरीद", "ऑर्डर", "कीमत", "चूड़ी", "bangles", "earring", "झुमका", "necklace", "chuda"]):
-        if is_hindi:
-            product_list = "\n".join([f"- {p['name']}: ₹{p['price']} - {p['desc']}" for p in STORE_INFO['products_hi']])
-            return f"हमारे पास ये हस्तनिर्मित लाख ज्वेलरी है:\n{product_list}\n\nऑर्डर करने के लिए प्रोडक्ट का नाम लिखें। COD उपलब्ध है।"
-        else:
-            product_list = "\n".join([f"- {p['name']}: ₹{p['price']} - {p['desc']}" for p in STORE_INFO['products_en']])
-            return f"Here's our handcrafted lac jewellery collection:\n{product_list}\n\nType the product name to order. COD available."
-
-    # Shipping
-    elif any(word in user_msg for word in ["shipping", "delivery", "cod", "शिपिंग", "डिलीवरी", "पहुंच"]):
+    if any(word in user_msg for word in ["hello", "hi", "namaste", "नमस्ते"]):
+        return f"नमस्ते! {STORE_INFO['name']} में आपका स्वागत है 👋" if is_hindi else f"Namaste! Welcome to {STORE_INFO['name']} 👋"
+    elif any(word in user_msg for word in ["product", "price", "प्रोडक्ट", "कीमत", "chuda", "bangles"]):
+        products = STORE_INFO['products_hi'] if is_hindi else STORE_INFO['products_en']
+        product_list = "\n".join([f"- {p['name']}: ₹{p['price']}" for p in products])
+        return f"हमारे प्रोडक्ट्स:\n{product_list}" if is_hindi else f"Our products:\n{product_list}"
+    elif any(word in user_msg for word in ["shipping", "cod", "शिपिंग"]):
         return STORE_INFO['shipping_hi'] if is_hindi else STORE_INFO['shipping_en']
-
-    # Returns
-    elif any(word in user_msg for word in ["return", "refund", "exchange", "रिटर्न", "वापसी", "बदल"]):
-        return STORE_INFO['returns_hi'] if is_hindi else STORE_INFO['returns_en']
-
-    # Hours
-    elif any(word in user_msg for word in ["hours", "open", "time", "timing", "समय", "खुला", "टाइम"]):
-        return STORE_INFO['hours_hi'] if is_hindi else STORE_INFO['hours_en']
-
-    # Contact / Order help
-    elif any(word in user_msg for word in ["contact", "human", "help", "whatsapp", "call", "संपर्क", "मदद", "बात"]):
-        if is_hindi:
-            return "ऑर्डर या किसी भी मदद के लिए हमें WhatsApp करें: +91-9314142164\nया ईमेल: support@"
-        else:
-            return "For orders or help, WhatsApp us: +91-9314142164\nOr email: support@lakheri.com"
-
-    # Default
     else:
-        if is_hindi:
-            return "मैं लाख चूड़ियां, झुमके, नेकलेस, शिपिंग, रिटर्न में मदद कर सकती हूँ। आप क्या जानना चाहते हैं?"
-        else:
-            return "I can help with lac bangles, jhumkas, necklaces, shipping, and returns. What would you like to know?"
+        return "मैं चूड़ियां, झुमके, शिपिंग में मदद कर सकती हूँ।" if is_hindi else "I can help with bangles, jhumkas, shipping."
 
 @app.route("/")
 def home():
@@ -90,3 +54,4 @@ def chat():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
