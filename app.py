@@ -80,7 +80,7 @@ def get_bot_response(user_msg):
 
 @app.route("/")
 def home():
-    return render_template("index.html", store_name=STORE_INFO['LAKHERI LAC BANGLES'])
+    return render_template("index.html", store_name=STORE_INFO['name'])
 
 @app.route("/chat", methods=["POST"])
 def chat():
