@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ Lakheri lac bangles }} Chatbot</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, 'Noto Sans Devanagari', sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; background: #fff8f0; }
+        h2 { text-align: center; color: #8B4513; }
+        #chatbox { border: 2px solid #d4a373; height: 400px; overflow-y: scroll; padding: 15px; margin-bottom: 10px; background: white; border-radius: 12px; }
+       .user { text-align: right; color: #fff; background: #e76f51; margin: 8px 0; padding: 8px 12px; border-radius: 18px 18px 0 18px; display: inline-block; float: right; clear: both; max-width: 80%; }
+       .bot { text-align: left; color: #264653; background: #f4a261; margin: 8px 0; padding: 8px 12px; border-radius: 18px 18px 18px 0; display: inline-block; float: left; clear: both; max-width: 80%; }
+        #input { width: 75%; padding: 12px; border: 2px solid #d4a373; border-radius: 25px; font-size: 16px; }
+        #send { width: 20%; padding: 12px; background: #e76f51; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; }
+        #send:hover { background: #f4a261; }
+    </style>
+</head>
+<body>
+    <h2>{{ store_name }} Chat Assistant</h2>
+    <div id="chatbox"></div>
+    <input type="text" id="input" placeholder="Type your message... / अपना संदेश लिखें..." />
+    <button id="send">Send</button>
+
+    <script>
+        document.getElementById('send').onclick = sendMessage;
+        document.getElementById('input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        function sendMessage() {
+            let input = document.getElementById('input');
+            let msg = input.value.trim();
+            if (!msg) return;
+
+            document.getElementById('chatbox').innerHTML += `<div class='user'>You: ${msg}</div>`;
+            input.value = '';
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: msg})
+            })
+           .then(res => res.json())
+           .then(data => {
+                document.getElementById('chatbox').innerHTML += `<div class='bot'>Bot: ${data.reply}</div>`;
+                document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
+            });
+        }
+    </script>
+</body>
+</html>
